@@ -63,7 +63,7 @@ train_ocr/
 
 ### Complete Training Pipeline
 
-![SquareCRNN Training Pipeline](images/training_pipeline.png)
+![SquareCRNN Training Pipeline](training_pipeline.png)
 
 *Sơ đồ quy trình huấn luyện hoàn chỉnh bao gồm:*
 - **Dữ liệu đầu vào**: OCRDataset với hình ảnh và nhãn
