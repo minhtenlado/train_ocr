@@ -1,0 +1,29 @@
+# Core Dependencies
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+
+# Computer Vision
+opencv-python>=4.8.0
+numpy>=1.24.0
+
+# Data Processing
+pandas>=2.0.0
+pillow>=9.0.0
+
+# Deep Learning Utilities
+Pillow>=9.0.0
+tqdm>=4.60.0
+
+# Optional: YOLO for object detection preprocessing
+ultralytics>=8.0.0
+
+# Jupyter Support (optional, for notebook usage)
+jupyter>=1.0.0
+ipython>=8.0.0
+matplotlib>=3.5.0
+
+# Development Tools (optional)
+black>=23.0.0
+flake8>=6.0.0
+pytest>=7.0.0

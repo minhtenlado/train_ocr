@@ -44,11 +44,7 @@ def rename_images(folder_path, start_index=676, prefix="img_"):
     except Exception as e:
         print(f"Có lỗi xảy ra: {e}")
 
-# ==========================================
-# CÁCH SỬ DỤNG
-# ==========================================
-# Thay thế chuỗi bên dưới bằng đường dẫn tới thư mục ảnh của bạn.
-# Lưu ý: Thêm chữ 'r' trước dấu ngoặc kép trên Windows để tránh lỗi đường dẫn.
+
 thu_muc_anh = r"C:\2026\Du_an_ky_thuat_nang_cao\train_ocr\images" 
 
 rename_images(thu_muc_anh, start_index=676, prefix="img_")
