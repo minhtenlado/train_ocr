@@ -100,7 +100,7 @@ Modify paths in `test.py` to point to your model and images.
 
 ### Complete Training Pipeline
 
-![SquareCRNN Training Pipeline](train_ocr/training_pipeline.png)
+![SquareCRNN Training Pipeline](training_pipeline.png)
 
 *Sơ đồ quy trình huấn luyện hoàn chỉnh bao gồm:*
 - **Dữ liệu đầu vào**: OCRDataset với hình ảnh và nhãn
