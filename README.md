@@ -98,6 +98,17 @@ Modify paths in `test.py` to point to your model and images.
 
 ## 📊 Model Architecture
 
+### Complete Training Pipeline
+
+![SquareCRNN Training Pipeline](images/training_pipeline.png)
+
+*Sơ đồ quy trình huấn luyện hoàn chỉnh bao gồm:*
+- **Dữ liệu đầu vào**: OCRDataset với hình ảnh và nhãn
+- **Tăng cường dữ liệu**: Điều chỉnh độ sáng, xoay, thêm nhiễu
+- **Mô hình SquareCRNN**: 4 khối Residual, Self-Attention, Bidirectional LSTM
+- **Quy trình huấn luyện**: CTC Loss, optimize với AdamW, ReduceLROnPlateau scheduler
+- **Lưu mô hình tốt nhất**: best_square_ocr_pro.pth
+
 ### SquareCRNN Components:
 
 1. **CNN Feature Extraction**
