@@ -1,106 +1,69 @@
-# Square CRNN OCR - Specialized Optical Character Recognition
+# Square CRNN OCR
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red.svg)](https://pytorch.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+🚀 **Specialized Optical Character Recognition using CRNN with Self-Attention**
 
-A high-performance OCR (Optical Character Recognition) system using **CRNN (Convolutional Recurrent Neural Networks)** with self-attention mechanism for recognizing alphanumeric characters in images.
+A high-performance OCR system for recognizing alphanumeric characters in images using Convolutional Recurrent Neural Networks (CRNN) with self-attention mechanism.
 
-## 🎯 Features
+## 📖 Documentation
 
-- **Advanced Architecture**: CRNN with Residual Blocks and Self-Attention mechanism
-- **Data Augmentation**: Intelligent augmentation including brightness, rotation, and noise injection
-- **Robust Training**: Implemented with:
-  - CTC (Connectionist Temporal Classification) loss
-  - Gradient clipping for stability
-  - Learning rate scheduling with ReduceLROnPlateau
-  - Weight initialization (Kaiming for Conv layers)
-  - Dropout regularization (0.3-0.4)
-- **LSTM Sequence Modeling**: Bidirectional LSTM (2 layers) for sequence recognition
-- **GPU Support**: Full CUDA/GPU acceleration
+Complete documentation is available in the [`docs/`](docs/) folder:
 
-## 📋 Project Structure
-
-```
-train_ocr/
-├── model.py              # CRNN model architecture with attention
-├── train.py              # Training script with CTC loss
-├── test.py               # Inference and testing utilities
-├── data.py               # Data preprocessing utilities
-├── name_img.py           # Image naming utilities
-├── train.ipynb           # Jupyter notebook for interactive training
-├── train.csv             # Training dataset annotations
-├── dataset/              # Dataset directory (images and labels)
-├── images/               # Sample images directory
-├── best_square_ocr_pro.pth  # Best trained model weights
-├── requirements.txt      # Python dependencies
-├── .gitignore           # Git ignore rules
-└── README.md            # This file
-```
+- **[Main README](docs/README.md)** - Overview, features, and architecture
+- **[Quick Start](docs/QUICKSTART.md)** - Get started in minutes
+- **[Setup Instructions](docs/SETUP.md)** - Detailed setup guide
+- **[API Reference](docs/API.md)** - API documentation
+- **[Dataset Documentation](docs/DATASET.md)** - Data format and preparation
+- **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Common issues and solutions
+- **[Benchmarks](docs/BENCHMARKS.md)** - Performance metrics
+- **[Changelog](docs/CHANGELOG.md)** - Version history
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Python 3.8 or higher
-- CUDA 11.0+ (optional, for GPU acceleration)
-- pip or conda
-
-### Installation
-
-1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/square-crnn-ocr.git
-cd square-crnn-ocr
-```
+# 1. Clone the repository
+git clone https://github.com/minhtenlado/train_ocr.git
+cd train_ocr
 
-2. **Create virtual environment** (recommended)
-```bash
-python -m venv venv
-# On Windows
-venv\Scripts\activate
-# On Linux/macOS
-source venv/bin/activate
-```
-
-3. **Install dependencies**
-```bash
+# 2. Install dependencies
 pip install -r requirements.txt
+
+# 3. Run training
+python src/train.py
+
+# 4. Test inference
+python src/test.py
 ```
 
-## 🏋️ Training
+## 📁 Project Structure
 
-### Basic Training
-```bash
-python train.py
+```
+train_ocr/
+├── src/           # Source code (models, training scripts, utilities)
+├── docs/          # Documentation and guides
+├── notebooks/     # Jupyter notebooks for interactive development
+├── models/        # Trained model weights and checkpoints
+├── data/          # Training data and datasets
+├── images/        # Sample images and diagrams
+├── tests/         # Test files
+├── requirements.txt
+├── LICENSE
+└── README.md      # This file
 ```
 
-### Using Jupyter Notebook
-```bash
-jupyter notebook train.ipynb
-```
+## ⭐ Key Features
 
-### Configuration
-Edit the `main()` function in `train.py` to customize:
-- Dataset paths
-- Batch size (default: 32)
-- Learning rate (default: 0.001)
-- Number of epochs (default: 150)
-- Image size (default: 128x128)
-- Hidden size (default: 256)
+- 🧠 **Advanced Architecture**: CRNN with Residual Blocks and Self-Attention
+- 📊 **Smart Data Augmentation**: Brightness, rotation, noise injection
+- 🎯 **Robust Training**: CTC Loss, AdamW optimizer, Learning rate scheduling
+- 🔄 **Bidirectional LSTM**: 2-layer LSTM for sequence modeling
+- ⚡ **GPU Acceleration**: Full CUDA/GPU support
+- 📈 **Production Ready**: Well-tested and optimized
 
-## 🧪 Testing/Inference
-
-```bash
-python test.py
-```
-
-Modify paths in `test.py` to point to your model and images.
-
-## 📊 Model Architecture
+## 🤖 Model Architecture
 
 ### Complete Training Pipeline
 
-![SquareCRNN Training Pipeline](training_pipeline.png)
+![SquareCRNN Training Pipeline](images/training_pipeline.png)
 
 *Sơ đồ quy trình huấn luyện hoàn chỉnh bao gồm:*
 - **Dữ liệu đầu vào**: OCRDataset với hình ảnh và nhãn
@@ -137,7 +100,7 @@ Default character set: `0-9 A-Z - .`
 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-.
 ```
 
-Modify in `train.py`:
+Modify in `src/train.py`:
 ```python
 chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-."
 char_map = {c: i + 1 for i, c in enumerate(chars)}
@@ -145,7 +108,7 @@ char_map = {c: i + 1 for i, c in enumerate(chars)}
 
 ## 🔧 Data Format
 
-### CSV Format (train.csv)
+### CSV Format (data/train.csv)
 ```csv
 image_filename.jpg,TEXT_CONTENT
 image2.jpg,ANOTHER_TEXT
@@ -202,27 +165,12 @@ The model includes intelligent augmentation:
 
 ## 📝 License
 
-This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) for details
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## 📧 Contact & Support
-
-For issues, questions, or suggestions, please open an issue on GitHub.
-
-## 🙏 Acknowledgments
-
-- Built with PyTorch and OpenCV
-- Inspired by industry-standard OCR architectures (CRNN)
-- Self-attention mechanism based on modern deep learning research
+Contributions welcome! See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines.
 
 ---
 
-⭐ If this project helped you, please consider starring it on GitHub!
+👉 Start with [docs/README.md](docs/README.md) for detailed information!
