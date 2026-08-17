@@ -7,12 +7,11 @@ with self-attention mechanism for recognizing alphanumeric characters.
 Modules:
     model: Neural network architecture (CRNN with Attention)
     train: Training script with data loading
-    test: Inference and evaluation utilities
     data: Data preprocessing utilities
     config: Configuration management
 
 Example:
-    >>> from model import SquareCRNN
+    >>> from src.model import SquareCRNN
     >>> import torch
     >>> model = SquareCRNN(num_classes=36)
     >>> x = torch.randn(32, 1, 128, 128)
@@ -25,16 +24,21 @@ __license__ = "MIT"
 
 __all__ = [
     'SquareCRNN',
+    'ResidualBlock',
+    'SimpleAttention',
     'OCRDataset',
     'collate_fn',
     'get_config',
 ]
 
-# Allow direct imports from package
 try:
-    from model import SquareCRNN
-    from train import OCRDataset, collate_fn, main as train_main
-    from config import get_config
+    from src.model import SquareCRNN, ResidualBlock, SimpleAttention
+    from src.train import OCRDataset, collate_fn, main as train_main
+    from src.config import get_config
 except ImportError:
-    # Fallback if imports fail during setup
-    pass
+    try:
+        from model import SquareCRNN, ResidualBlock, SimpleAttention
+        from train import OCRDataset, collate_fn, main as train_main
+        from config import get_config
+    except ImportError:
+        pass

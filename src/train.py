@@ -24,14 +24,27 @@ Author: OCR Development Team
 License: MIT
 """
 
+import os
+import sys
+import random
+import numpy as np
+import cv2
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
-import cv2
-import numpy as np
-import os
-import random
+
+# Ensure package imports work regardless of working directory
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if base_dir not in sys.path:
+    sys.path.insert(0, base_dir)
+
+try:
+    from src.model import SquareCRNN
+    from src.config import CHARACTER_SET
+except ImportError:
+    from model import SquareCRNN
+    from config import CHARACTER_SET
 
 
 class OCRDataset(Dataset):
@@ -93,7 +106,6 @@ class OCRDataset(Dataset):
         print(f"-> Loại bỏ: {missing_imgs} ảnh rỗng, {invalid_labels} nhãn sai.")
         print(f"-> Sẵn sàng huấn luyện: {len(self.valid_data)} mẫu.")
 
-
     def augment_image(self, img):
         """
         Apply intelligent data augmentation to image.
@@ -109,18 +121,15 @@ class OCRDataset(Dataset):
         Returns:
             np.ndarray: Augmented image
         """
-        # 1. Chỉnh sáng/tối
         alpha = random.uniform(0.7, 1.3)
         beta = random.randint(-30, 30)
         img = cv2.convertScaleAbs(img, alpha=alpha, beta=beta)
 
-        # 2. Xoay nhẹ ảnh (Mô phỏng camera lắp bị nghiêng)
         if random.random() > 0.5:
             rows, cols = img.shape
-            M = cv2.getRotationMatrix2D((cols/2, rows/2), random.uniform(-5, 5), 1)
-            img = cv2.warpAffine(img, M, (cols, rows), borderValue=(0)) # Điền nền đen cho góc bị thiếu
+            M = cv2.getRotationMatrix2D((cols / 2, rows / 2), random.uniform(-5, 5), 1)
+            img = cv2.warpAffine(img, M, (cols, rows), borderValue=(0))
 
-        # 3. Thêm nhiễu Gaussian Noise (Mô phỏng camera dỏm, thiếu sáng)
         if random.random() > 0.7:
             gauss = np.random.normal(0, 15, img.size).reshape(img.shape).astype('uint8')
             img = cv2.add(img, gauss)
@@ -128,34 +137,11 @@ class OCRDataset(Dataset):
         return img
 
     def __len__(self):
-        """
-        Get total number of valid samples in the dataset.
-        
-        Returns:
-            int: Number of valid image-label pairs
-        """
+        """Get total number of valid samples in dataset."""
         return len(self.valid_data)
 
     def __getitem__(self, idx):
-        """
-        Load and preprocess image and label at given index.
-        
-        Processes:
-        1. Load grayscale image from file
-        2. Apply augmentation if training mode
-        3. Resize to target size
-        4. Normalize to [-1, 1] range
-        5. Convert to tensor with channel dimension
-        
-        Args:
-            idx (int): Index of sample to load
-            
-        Returns:
-            tuple: (image_tensor, target_indices, sequence_length)
-                - image_tensor: torch.Tensor of shape (1, height, width)
-                - target_indices: torch.Tensor of character indices
-                - sequence_length: int, number of characters in label
-        """
+        """Load and preprocess image and label at given index."""
         img_path, target = self.valid_data[idx]
         img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
 
@@ -177,22 +163,11 @@ def collate_fn(batch):
     """
     Collate function for DataLoader to handle variable-length sequences.
     
-    Combines batch of samples into tensors:
-    - Stacks images into single tensor
-    - Concatenates character indices from all samples
-    - Creates target length tensor for CTC loss
-    
-    This is necessary because individual samples have different label lengths.
-    CTC loss requires separate target lengths to know sequence boundaries.
-    
     Args:
         batch (list): List of (image, target, length) tuples from OCRDataset
         
     Returns:
         tuple: (images, targets, target_lengths)
-            - images: torch.Tensor of shape (batch_size, 1, height, width)
-            - targets: torch.Tensor of concatenated character indices
-            - target_lengths: torch.Tensor of shape (batch_size,) with label lengths
     """
     imgs, targets, target_lengths = zip(*batch)
     imgs = torch.stack(imgs)
@@ -200,36 +175,12 @@ def collate_fn(batch):
     target_lengths = torch.tensor(target_lengths, dtype=torch.long)
     return imgs, targets, target_lengths
 
+
 def main():
     """
     Main training loop for Square CRNN OCR model.
-    
-    Workflow:
-    1. Initialize model, optimizer, and loss function
-    2. Load dataset and create DataLoader
-    3. Train for specified number of epochs
-    4. Save best model based on validation loss
-    5. Use learning rate scheduling to fine-tune during training
-    
-    Key Features:
-    - CTC Loss for variable-length sequence recognition
-    - Gradient clipping (max_norm=5.0) for training stability
-    - ReduceLROnPlateau scheduler for adaptive learning rate
-    - Model checkpointing based on best loss
-    
-    Hyperparameters:
-    - Batch size: 32
-    - Epochs: 150
-    - Learning rate: 0.001 (initial)
-    - Weight decay: 1e-4
-    - Gradient clip: 5.0
-    
-    Configuration:
-    - Edit dataset paths (drive_dir, csv_path, img_dir) as needed
-    - Modify batch_size, epochs, learning rate in this function
-    - Use config.py for centralized configuration
     """
-    chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-."
+    chars = CHARACTER_SET
     char_map = {c: i + 1 for i, c in enumerate(chars)}
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -239,23 +190,28 @@ def main():
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=4, factor=0.5, min_lr=1e-6)
     criterion = nn.CTCLoss(blank=0, zero_infinity=True).to(device)
 
-    # Set up paths relative to project structure
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    csv_path = os.path.join(base_dir, 'data', 'train.csv')
-    img_dir = os.path.join(base_dir, 'data', 'dataset')
+    # Resolve CSV and images paths flexibly
+    csv_path = os.path.join(base_dir, 'train.csv')
+    if not os.path.exists(csv_path):
+        csv_path = os.path.join(base_dir, 'data', 'train.csv')
+
+    img_dir = os.path.join(base_dir, 'images')
+    if not os.path.exists(img_dir):
+        img_dir = os.path.join(base_dir, 'data', 'dataset')
 
     if not os.path.exists(csv_path):
-        print(f"ERROR: File not found {csv_path}. Please mount your dataset first.")
+        print(f"ERROR: CSV File not found at {csv_path}. Please check data path.")
         return
 
-    # Load training dataset
+    print(f"[+] Loading dataset from CSV: {csv_path}")
+    print(f"[+] Image directory: {img_dir}")
+
     dataset = OCRDataset(csv_path, char_map, img_dir, is_train=True)
 
     if len(dataset) == 0:
         print("ERROR: No valid training samples found. Check data files and paths.")
         return
 
-    # Create data loader with collate function for variable-length sequences
     loader = DataLoader(dataset, batch_size=32, shuffle=True, collate_fn=collate_fn, num_workers=2)
 
     print(f"\n--- Starting training on {device} ---")
@@ -289,7 +245,6 @@ def main():
 
         print(f"Epoch [{epoch:3d}/{epochs}] - Loss: {avg_loss:.4f} - LR: {optimizer.param_groups[0]['lr']:.6f}")
 
-        # Save model if loss improved
         if avg_loss < best_loss:
             best_loss = avg_loss
             models_dir = os.path.join(base_dir, 'models')
@@ -297,6 +252,7 @@ def main():
             save_path = os.path.join(models_dir, 'best_square_ocr_pro.pth')
             torch.save(model.state_dict(), save_path)
             print(f"  ✓ Model saved: {save_path} (Best Loss: {best_loss:.4f})")
+
 
 if __name__ == "__main__":
     main()
